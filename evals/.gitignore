@@ -1,0 +1,2 @@
+# Ignore eval results (can be large, regenerated)
+eval_results/

@@ -1,0 +1,14 @@
+{
+  "name": "kindred-histories-test",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "test": "node test.js",
+    "test:unauth": "node test.js --unauth-only",
+    "test:auth": "node test.js --auth-only"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.0",
+    "puppeteer": "^24.0.0"
+  }
+}

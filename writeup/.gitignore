@@ -1,0 +1,25 @@
+# LaTeX build artifacts
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.toc
+*.lof
+*.lot
+*.nav
+*.snm
+*.vrb
+
+# Generated PDF (can regenerate from source)
+forgotten_histories_v1.pdf
+
+# macOS
+.DS_Store
+
+# Editor backups
+*~
+*.bak

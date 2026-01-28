@@ -1,0 +1,293 @@
+\documentclass[11pt]{article}
+
+% Packages
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{wrapfig}
+\usepackage{enumitem}
+\usepackage[numbers,sort&compress]{natbib}
+
+% Custom commands
+\newcommand{\system}{\textsc{Kindred Histories}}
+\newcommand{\dspy}{\textsc{DSPy}}
+
+\title{Kindred Histories: An AI-Powered Framework for\\Discovering Forgotten Historical Figures}
+\author{Wilka Carvalho\\
+\small Kempner Institute for the Study of Natural and Artificial Intelligence\\
+\small Harvard University}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Historical narratives have systematically marginalized contributions from underrepresented communities. We present \system{}, an AI-powered web application that helps users from marginalized backgrounds discover historical figures who share their identity traits. Users describe themselves in natural language, and the system extracts structured identity facets, searches for matching historical figures, and presents results with semantic filtering by identity dimension. By surfacing forgotten figures who overcame adversity, the system aims to expand users' sense of what futures are possible for people like them.
+\end{abstract}
+
+%==============================================================================
+\section{Introduction}
+%==============================================================================
+
+The historical record privileges certain narratives while systematically obscuring others. Contributions from women, people of color, LGBTQ+ individuals, and other marginalized communities have been underrepresented in mainstream historical accounts.
+
+We present \system{}, an interactive system that leverages large language models to discover forgotten historical figures who share identity traits with the user. The core technical challenge lies in bridging the gap between a user's informal, multifaceted self-description and the structured queries needed to discover relevant historical figures. A user might describe themselves as ``a queer Latina interested in neuroscience who grew up in Georgia''---this single sentence contains multiple overlapping identity dimensions that must be disentangled, combinatorially explored, and matched against the historical record.
+
+Beyond technical discovery, \system{} serves a psychological function: by presenting users with historical figures who share their identity and achieved meaningful lives despite adversity, the system aims to expand users' sense of what is possible---populating their imagination with concrete examples of people like them who succeeded.
+
+%==============================================================================
+\section{Related Work}
+%==============================================================================
+
+Our work draws on four bodies of research: identity-aware computing that centers marginalized perspectives, psychological research on role models and well-being, exploratory search systems that support open-ended discovery, and LLM-powered pipelines that orchestrate complex information-seeking tasks.
+
+\subsection{Identity and Representation in Interactive Systems}
+
+Human-computer interaction research has increasingly recognized that identity shapes how people experience technology. Schlesinger et al.~\cite{schlesinger2017intersectional} introduced \emph{intersectional HCI}, arguing that systems must account for how race, gender, class, and other identity dimensions interact---a user is not simply ``Latina'' or ``queer'' but experiences these identities simultaneously and inseparably. Bardzell~\cite{bardzell2010feminist} established feminist HCI principles including \emph{pluralism} (designing for multiple viewpoints), \emph{advocacy} (taking political stances), and \emph{self-disclosure} (acknowledging designers' own positions). These principles inform our decision to explicitly surface marginalized narratives rather than claiming neutrality.
+
+The Design Justice movement~\cite{costanza2018design} extends these ideas, arguing that design processes should center the voices of those most affected by their outcomes. Noble's \emph{Algorithms of Oppression}~\cite{noble2018algorithms} demonstrates how search engines systematically disadvantage marginalized communities, reinforcing stereotypes and burying counter-narratives. Our system attempts to counteract this by specifically seeking figures whom mainstream algorithms would deprioritize.
+
+In education, Scott et al.~\cite{scott2015culturally} developed \emph{culturally responsive computing}, which treats students' cultural identities as assets rather than deficits. Wong-Villacres et al.~\cite{wong2020culture} extend this ``assets-based'' approach to HCI design broadly, unpacking how cultural capacities can inform system design. Digital humanities scholars have similarly argued for computational methods that surface marginalized voices; Risam~\cite{risam2015beyond} demonstrates how digital tools can construct intersectional counter-narratives that challenge dominant historical framings. Recent surveys of HCI for cultural heritage~\cite{hirsch2024hci} emphasize \emph{multiperspectivity}---designing systems that accommodate multiple, sometimes conflicting, interpretations of the past.
+
+\subsection{Role Models, Identity, and Psychological Well-being}
+
+A substantial body of psychological research demonstrates that exposure to role models who share one's identity has measurable benefits for well-being, motivation, and achievement. This literature provides theoretical grounding for why discovering forgotten historical figures might help marginalized users.
+
+\paragraph{Possible Selves and Future Imagining.}
+Markus and Nurius~\cite{markus1986possible} introduced the concept of \emph{possible selves}---cognitive representations of what individuals might become, want to become, or fear becoming. Possible selves ``provide a conceptual link between cognition and motivation,'' functioning as incentives for future behavior. Historical figures who share a user's identity serve as concrete exemplars of possible selves, demonstrating that people like them have achieved remarkable things. Oyserman et al.~\cite{oyserman2006possible} showed that possible selves drive action most effectively when they feel connected to one's current identity---precisely the connection \system{} makes explicit by matching figures to users' stated identity facets. Hershfield~\cite{hershfield2011future} demonstrated that future self-continuity depends on perceived similarity, vividness, and positivity; our system's detailed biographical profiles address all three dimensions.
+
+\paragraph{Role Model Theory.}
+Morgenroth et al.~\cite{morgenroth2015motivational} formalized how role models influence aspirants through three functions: serving as behavioral models, representing the possible, and providing inspiration. For marginalized groups, role models are especially powerful because they demonstrate ``what is attainable'' for similar others. Stout et al.~\cite{stout2011stemming} demonstrated a ``stereotype inoculation'' effect: exposure to ingroup experts protected women's self-concept in STEM, enhancing self-efficacy and domain identification through felt connectedness to the role model.
+
+\paragraph{Identity Affirmation and Well-being.}
+Cohen and colleagues~\cite{cohen2006reducing,cohen2009recursive} showed that brief self-affirmation interventions---writing about personal values---significantly improved academic outcomes for African American students, with effects lasting years. These interventions work by affirming self-integrity in the face of identity threat. Discovering historical figures who share one's identity functions as a form of identity affirmation. Smith and Silva's~\cite{smith2011ethnic} meta-analysis of 184 studies found a positive relationship between ethnic identity and well-being among people of color, with effects twice as large for self-esteem as for distress reduction.
+
+\paragraph{Narrative Identity.}
+McAdams and McLean~\cite{mcadams2013narrative} described how people construct \emph{narrative identity}---internalized life stories that integrate past and imagined future to provide unity and purpose. Narrators who find redemptive meanings in adversity show higher well-being. Historical figures who overcame challenges provide narrative templates that users can incorporate into their own life stories, offering frameworks for making meaning of struggles.
+
+\paragraph{Hope and Pathways.}
+Snyder et al.~\cite{snyder1991will} conceptualized hope as comprising agency (belief in one's capacity) and pathways (routes to goals), arguing that ``multiple routes to desired goals are absolutely essential for successful hopeful thought.'' Each historical figure discovered by \system{} represents a different pathway---a route someone with similar identity traits took toward a meaningful life---thereby sustaining hope through diversity of examples.
+
+\paragraph{Identity-Based Motivation.}
+Oyserman and Destin~\cite{oyserman2010identity} proposed that people prefer identity-congruent actions; when goals feel congruent with identity, difficulties are reinterpreted as meaningful rather than discouraging. \system{} expands users' sense of what identities like theirs can accomplish, making ambitious goals feel like natural extensions of who they are.
+
+Collectively, this literature suggests that exposing marginalized users to historical figures who share their identity can expand their sense of possibility, affirm their identity, provide narrative templates for their own lives, and sustain hope through diverse pathways---all with documented psychological benefits.
+
+\subsection{Exploratory and Faceted Search}
+
+Traditional information retrieval assumes users have specific information needs they can express as queries. Exploratory search~\cite{athukorala2016exploratory} recognizes that users often begin with vague goals that evolve through interaction---precisely the situation when someone asks ``who from history was like me?'' Faceted search interfaces~\cite{hearst2006clustering} support this exploration by letting users incrementally constrain results along multiple dimensions. Eye-tracking studies~\cite{kules2009exploratory} show that exploratory searchers use facets differently than lookup searchers, treating them as tools for understanding result sets rather than merely filtering them.
+
+Our system extends faceted search with identity-specific dimensions (race, ethnicity, gender, sexuality, interests, aspirations) that can be toggled in OR or AND modes. We derive facets from the user's self-description, making the facet vocabulary personal rather than universal.
+
+For semantic matching, we use sentence embeddings based on Sentence-BERT~\cite{reimers2019sentence}, which produce dense vector representations suitable for similarity computation. Recent surveys of dense retrieval~\cite{zhao2024dense} describe bi-encoder architectures where queries and documents are independently embedded then compared---we apply this pattern at the facet level, embedding both user attributes and historical figure attributes to compute per-dimension similarity scores.
+
+The emerging field of conversational search~\cite{radlinski2017theoretical} provides frameworks for natural-language information seeking that unfolds over multiple turns. While our current interface uses a single-turn input, the underlying architecture---which iteratively refines searches based on incomplete results---reflects conversational search principles. Query expansion techniques~\cite{azad2019query} that reformulate user queries to improve recall also inform our approach of sampling multiple demographic combinations from a single user description.
+
+\subsection{LLM-Powered Information Discovery}
+
+Large language models have enabled new architectures for information-seeking systems. \dspy{}~\cite{khattab2024dspy} provides a programming framework for composing LLM calls into pipelines, treating prompts as modules that can be optimized and composed. We use \dspy{} to structure our agent into distinct phases: attribute extraction, figure discovery, and iterative research.
+
+Chain-of-thought prompting~\cite{wei2022chain} improves LLM reasoning by eliciting intermediate steps before final answers. We apply this technique during social model extraction, where the model must disambiguate complex identity descriptions (e.g., distinguishing ethnicity from nationality). The ReAct framework~\cite{yao2023react} interleaves reasoning with tool use, enabling agents that can search, reflect, and search again---our research loop follows this pattern, with a ``judge'' component deciding whether more search is needed.
+
+Self-Refine~\cite{madaan2023self} demonstrates that LLMs can iteratively improve their outputs through self-feedback. Our research loop similarly iterates until a judge module determines the profile is complete, though we use web search results rather than pure self-critique as the basis for refinement. Retrieval-augmented generation (RAG) systems~\cite{gao2024retrieval} ground LLM outputs in retrieved documents; our architecture extends RAG with an agentic loop that decides \emph{what} to retrieve based on current knowledge gaps.
+
+Recent work explores LLMs for knowledge graph construction~\cite{pan2023unifying}, demonstrating their ability to extract structured information from unstructured sources. Our system combines these threads: using LLMs to extract structured identity facets, discover relevant entities through search, and construct knowledge (historical figure profiles) that supports identity-based exploration.
+
+\begin{figure}[!h]
+  \centering
+  %\includegraphics[width=0.5\textwidth]{figures/screenshot_chat_filled.png}
+  %\\[0.5em]
+  \includegraphics[width=1\textwidth]{figures/screenshot_results.png}
+  \caption{Example of discovered historical figures with facet filtering and similarity scores.}
+  \label{fig:interface}
+\end{figure}
+%==============================================================================
+\section{System Design}
+%==============================================================================
+
+
+The user begins by entering a natural language description of themselves in a chat-style interface (Figure~\ref{fig:interface}, top). They might write something like: \emph{``I'm a queer Latina woman interested in neuroscience. I grew up in rural Georgia and want to become a researcher.''} After submitting, the system displays results progressively as historical figures are discovered and researched (Figure~\ref{fig:interface}, bottom). Users can filter results by identity facets, seeing similarity scores that indicate how closely each figure matches specific dimensions of their identity.
+
+\paragraph{Social Model Extraction.}
+The system first transforms the user's free-form description into a structured representation called a \emph{Social Model}. This model comprises eight identity facets: race, ethnicity, cultural background, location, gender, sexuality, interests, and aspirations. A language model extracts these facets through chain-of-thought reasoning, handling the ambiguity inherent in natural language descriptions.
+
+For example, given the input \emph{``I'm a queer Latina interested in neuroscience from Georgia,''} the system produces:
+\begin{quote}
+\small
+\textbf{Race:} Latina \\
+\textbf{Gender:} Woman \\
+\textbf{Sexuality:} Queer \\
+\textbf{Location:} Georgia \\
+\textbf{Interests:} Neuroscience
+\end{quote}
+
+\begin{wrapfigure}{r}{0.45\textwidth}
+  \centering
+  \vspace{-10pt}
+  \includegraphics[width=0.43\textwidth]{figures/combination_probability.pdf}
+  \caption{Probability distribution for selecting $k$ attributes when sampling demographic combinations. Smaller combinations are preferred because they yield broader search results.}
+  \label{fig:probability}
+  \vspace{-10pt}
+\end{wrapfigure}
+
+\paragraph{Combination Sampling.}
+Given a Social Model with multiple values per facet, the space of possible demographic combinations is combinatorially large. Exhaustive search is impractical, so the system uses probabilistic sampling to generate diverse search queries.
+
+The key insight is that smaller combinations (2--3 attributes) tend to yield more search results than highly specific queries with 5--6 constraints. The system samples the number of attributes $k$ according to an exponential decay distribution: $P(k) \propto \exp(-0.7 \cdot (k - 2))$ for $k \geq 2$. Figure~\ref{fig:probability} shows this distribution, which strongly favors smaller combinations while still occasionally exploring more specific queries.
+
+For each sample, the system selects specific values from available facets, optionally enriching with interests, aspirations, or related professions the user may not have mentioned but could find inspiring.
+
+\paragraph{Figure Discovery.}
+For each sampled demographic combination, the system queries a language model with web search capabilities. The prompt instructs the model to find forgotten historical figures from marginalized backgrounds matching the given demographics. The model synthesizes search results into a list of candidate names.
+
+Discovered names are deduplicated across all parallel searches before proceeding to detailed research. The system validates each name to filter out common failure modes where the language model returns descriptions or sentences instead of actual names.
+
+\paragraph{Iterative Research.}
+For each unique candidate name, the system spawns an independent research process that gathers comprehensive biographical information through iterative web searches. The research loop follows four steps:
+
+\begin{enumerate}[nosep]
+  \item \textbf{Check completeness}: Examine the current profile for missing required fields (marginalization context, challenges faced, how they overcame those challenges, achievements, and demographic information).
+  \item \textbf{Plan search}: Based on what's missing, formulate a targeted search query.
+  \item \textbf{Execute search}: Query the web and synthesize results into the profile.
+  \item \textbf{Iterate}: Repeat until the profile is complete or maximum attempts (3) are reached.
+\end{enumerate}
+
+This iterative approach is necessary because a single query rarely produces complete information. The first iteration might find biographical dates and achievements, the second might uncover challenges they faced, and the third might reveal how they overcame adversity.
+
+\paragraph{Semantic Filtering.}
+The frontend provides per-facet similarity scores computed using sentence embeddings. Users can toggle individual facets to filter results and choose between two modes: \emph{OR mode} shows figures matching at least one enabled facet well, suitable for exploratory browsing; \emph{AND mode} shows only figures with strong average scores across all enabled facets, for focused matching.
+
+When no figures match the current filter, the system can automatically trigger a new search for that specific facet combination, progressively expanding the database as users explore.
+
+%==============================================================================
+\section{Conclusion}
+%==============================================================================
+
+\system{} demonstrates a practical approach to surfacing marginalized historical narratives through AI-powered discovery. The system separates user understanding from figure research, enabling responsive initial results while comprehensive research proceeds in the background. Probabilistic combination sampling explores the identity space efficiently, and iterative research produces thorough profiles. The frontend's semantic filtering empowers users to explore identity connections along multiple dimensions.
+
+Beyond technical discovery, \system{} is grounded in psychological research showing that exposure to identity-matched role models can affirm users' sense of self, expand their imagination of possible futures, and provide narrative templates for making meaning of their own challenges. By surfacing forgotten historical figures who share users' identity traits and overcame adversity to achieve meaningful lives, the system aims not just to inform but to inspire.
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\clearpage
+
+%==============================================================================
+\appendix
+\section{Implementation Details}
+%==============================================================================
+
+\subsection{Backend Implementation}
+
+The backend is built with FastAPI and \dspy{}, a framework for programming language models. All LLM interactions use Gemini via a custom \dspy{} wrapper that supports tool use (web search).
+
+\paragraph{DSPy Modules.}
+Social model extraction uses \texttt{ChainOfThought}, which prompts the model to show its reasoning before producing structured output. Figure discovery and research use \texttt{Predict} with a \texttt{tools} argument enabling Google Search grounding.
+
+\paragraph{Output Parsing.}
+LLM outputs require robust parsing to handle formatting variations. The system accepts multiple separators (pipe, comma, semicolon, slash), removes parenthetical explanations, and filters placeholder values like ``not specified'' or ``unknown.''
+
+\paragraph{Name Validation.}
+A six-stage validation pipeline filters discovered names: reject entries longer than 60 characters, reject sentence patterns (containing articles, pronouns, or verbs), require 2--6 words, reject non-name patterns (company names, technical acronyms), and require initial capitalization or honorifics.
+
+\paragraph{Rate Limiting.}
+A token-bucket rate limiter prevents exceeding API quotas (default: 1000 requests/minute). Transient failures trigger exponential backoff with jitter: base delay of 1 second, doubling per retry up to 30 seconds, with 10\% random jitter to prevent thundering herd problems.
+
+\paragraph{Parallel Processing.}
+Figure discovery runs in a \texttt{ThreadPoolExecutor} for concurrent API calls. Research processes use \texttt{ProcessPoolExecutor} for CPU isolation, allowing the system to leverage multiple cores during profile synthesis.
+
+\subsection{Frontend Implementation}
+
+\definecolor{accentpurple}{HTML}{7c4dff}
+\definecolor{scoregreen}{HTML}{4caf50}
+\definecolor{scorelightgreen}{HTML}{8bc34a}
+\definecolor{scoreyellow}{HTML}{ffc107}
+\definecolor{scoreorange}{HTML}{ff9800}
+\definecolor{scoregray}{HTML}{666666}
+
+The frontend is built with React and uses a dark theme with \textcolor{accentpurple}{purple} accent.
+
+\paragraph{Similarity Score Colors.}
+Scores use color coding:
+\begin{center}
+\begin{tabular}{cl}
+\textcolor{scoregreen}{green} & $\geq 0.8$ \\
+\textcolor{scorelightgreen}{light green} & $0.6$--$0.8$ \\
+\textcolor{scoreyellow}{yellow} & $0.4$--$0.6$ \\
+\textcolor{scoreorange}{orange} & $0.2$--$0.4$ \\
+\textcolor{scoregray}{gray} & $< 0.2$ \\
+\end{tabular}
+\end{center}
+
+\paragraph{Table Layout.}
+Column widths are optimized per content type: 180px for name/image, 250px for narrative text, 80px for overall score, 100px per facet column. Headers are sticky and sortable.
+
+\paragraph{Polling.}
+The frontend polls every 3 seconds during auto-discovery, for up to 60 seconds (20 attempts). A combination key prevents redundant searches for the same facets.
+
+\subsection{Embedding Generation}
+
+Facet embeddings use BGE-small-en-v1.5, a compact (384-dimension) sentence embedding model running locally. Rather than embedding bare values, the system constructs sentences: the race value ``Black'' becomes ``This person's race is Black,'' providing grammatical context that improves similarity calculations.
+
+\subsection{Caching}
+
+Search results are cached in Firestore for 30 days, keyed by original search text. A shorter-lived facet cache (5 minutes) stores aggregated vocabulary. For authenticated users, search history provides persistent user-specific caching.
+
+%==============================================================================
+\section{Citation Evidence}
+\label{sec:citation-evidence}
+%==============================================================================
+
+This appendix provides supporting quotes and relevance justifications for key citations in the Related Work section.
+
+\subsection{Identity and Representation}
+
+\paragraph{Schlesinger et al.~\cite{schlesinger2017intersectional}} ``Intersectionality offers a lens through which we can examine research in HCI as it relates to issues of identity... We argue that work on gender, race, and class in HCI is interconnected and can be strengthened by considering these dimensions together.'' \emph{Relevance:} Provides theoretical grounding for treating identity as multidimensional and overlapping, directly informing our Social Model design.
+
+\paragraph{Bardzell~\cite{bardzell2010feminist}} ``Feminist HCI comprises a set of qualities: pluralism, participation, advocacy, ecology, embodiment, and self-disclosure.'' \emph{Relevance:} The pluralism and advocacy principles justify designing a system that explicitly surfaces marginalized voices rather than claiming algorithmic neutrality.
+
+\paragraph{Noble~\cite{noble2018algorithms}} ``Search engines... have become increasingly important arbiters of information... [yet] search results often reflect and reinforce stereotypical and even racist ideas about people of color.'' \emph{Relevance:} Documents the problem our system addresses---mainstream search deprioritizes marginalized historical figures.
+
+\paragraph{Scott et al.~\cite{scott2015culturally}} ``Culturally responsive computing... positions the histories and knowledge bases of students of color as assets that can be leveraged.'' \emph{Relevance:} Informs our assets-based approach where user identity is a strength for discovery, not a limitation.
+
+\subsection{Role Models and Psychological Well-being}
+
+\paragraph{Markus \& Nurius~\cite{markus1986possible}} ``Possible selves represent individuals' ideas of what they might become, what they would like to become, and what they are afraid of becoming, and thus provide a conceptual link between cognition and motivation.'' \emph{Relevance:} Foundational theory explaining why historical figures serve as cognitive representations of what users themselves might become.
+
+\paragraph{Morgenroth et al.~\cite{morgenroth2015motivational}} ``Role models serve 3 distinct functions: (a) they show us how to perform a skill and achieve a goal---they are behavioral models; (b) they show us that a goal is attainable---they are representations of the possible; and (c) they make a goal desirable---they are inspirations.'' \emph{Relevance:} Directly theorizes how historical figures function as role models who ``represent the possible'' for marginalized users.
+
+\paragraph{Cohen et al.~\cite{cohen2006reducing}} ``A brief in-class writing assignment about personal values significantly improved the grades of African American students and reduced the racial achievement gap by 40\%.'' \emph{Relevance:} Demonstrates that brief identity-affirming interventions have substantial, lasting effects; discovering kindred historical figures functions as a form of identity affirmation.
+
+\paragraph{Stout et al.~\cite{stout2011stemming}} ``Women's own self-concept benefited from contact with female experts even though negative stereotypes about their gender and STEM remained active... This heightened sense of connectedness subsequently predicted enhanced self-efficacy.'' \emph{Relevance:} Demonstrates the ``stereotype inoculation'' effect through ingroup role models, which our system facilitates by matching figures to users' identity facets.
+
+\paragraph{Smith \& Silva~\cite{smith2011ethnic}} Meta-analysis of 184 studies found ``studies correlating ethnic identity with self-esteem and positive well-being yielded average effect sizes twice as large as those from studies correlating ethnic identity with personal distress.'' \emph{Relevance:} Robust evidence that affirming ethnic/cultural identity supports well-being, particularly self-esteem.
+
+\paragraph{McAdams \& McLean~\cite{mcadams2013narrative}} ``Narrators who find redemptive meanings in suffering and adversity, and who construct life stories that feature themes of personal agency and exploration, tend to enjoy higher levels of mental health, well-being, and maturity.'' \emph{Relevance:} Historical figures who overcame adversity provide redemptive narrative templates for users' own life stories.
+
+\paragraph{Snyder et al.~\cite{snyder1991will}} ``Multiple routes to desired goals are absolutely essential for successful hopeful thought.'' \emph{Relevance:} Each historical figure represents a different ``pathway,'' sustaining hope through diversity of examples.
+
+\subsection{Search and Retrieval}
+
+\paragraph{Hearst~\cite{hearst2006clustering}} ``Faceted metadata has proven to be a highly successful organizing structure for search results... Faceted search allows users to navigate a multidimensional information space.'' \emph{Relevance:} Foundational work on faceted interfaces that informs our per-facet filtering design.
+
+\paragraph{Athukorala et al.~\cite{athukorala2016exploratory}} ``Exploratory search is characterized by uncertainty and evolving information needs... users often do not know exactly what they are looking for until they see it.'' \emph{Relevance:} Describes the search behavior our system supports---users exploring ``who was like me?'' rather than seeking specific figures.
+
+\paragraph{Reimers \& Gurevych~\cite{reimers2019sentence}} ``Sentence-BERT... derives semantically meaningful sentence embeddings that can be compared using cosine-similarity.'' \emph{Relevance:} The embedding approach we use for computing semantic similarity between user facets and historical figure attributes.
+
+\subsection{LLM Systems}
+
+\paragraph{Khattab et al.~\cite{khattab2024dspy}} ``\dspy{} is a framework for algorithmically optimizing LM prompts and weights... Programs are expressed as compositions of modules.'' \emph{Relevance:} The framework we use to structure our agent pipeline into composable, optimizable modules.
+
+\paragraph{Wei et al.~\cite{wei2022chain}} ``Chain-of-thought prompting... enables complex reasoning capabilities through intermediate reasoning steps.'' \emph{Relevance:} Applied during social model extraction where the LLM must reason about ambiguous identity descriptions.
+
+\paragraph{Yao et al.~\cite{yao2023react}} ``ReAct prompts LLMs to generate both verbal reasoning traces and actions... in an interleaved manner.'' \emph{Relevance:} Informs our research loop architecture where the agent reasons about what information is missing, then acts by searching.
+
+\paragraph{Madaan et al.~\cite{madaan2023self}} ``Self-Refine... iteratively improves initial outputs from LLMs through a process of generating, evaluating, and refining.'' \emph{Relevance:} Our iterative research loop follows this generate-evaluate-refine pattern with a judge module assessing profile completeness.
+
+\end{document}

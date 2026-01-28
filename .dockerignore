@@ -1,0 +1,64 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Frontend
+frontend/
+node_modules/
+
+# Documentation
+*.md
+README.md
+CLAUDE.md
+FACETED_SEARCH.md
+FACETED_UI_GUIDE.md
+USER_FACET_FILTERING.md
+improvements.md
+instrunctions.md
+
+# Firebase
+.firebaserc
+firebase.json
+firestore.rules
+firestore.indexes.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Scripts
+populate_database_initial.py
+clear_database.py
+test_*.py
+
+# Logs
+*.log
+
+# Cloud Build (if building remotely)
+cloudbuild.yaml
